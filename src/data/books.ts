@@ -160,42 +160,78 @@ const spanishCategoryLabel: Record<Category, string> = {
   marriage: "el matrimonio y la pareja",
 };
 
+// Large, varied paragraph pools per language. Each book picks a unique sequence
+// using a deterministic seed derived from its title+author, so no two books read
+// the same text. The book's own description, title, and author are also woven
+// into the pages so the content feels specific to that book.
+
 const arParagraphs = [
-  "في صمت الفجر، حين يلتفّ النور حول العالم كحجاب رقيق، يفتح القارئ كتابه كما يفتح المسافر بابًا قديمًا على حديقة لم يزرها من قبل. كل كلمة تنبت كزهرة، وكل سطر يصير ممرًّا بين أشجار المعنى.",
-  "قال أحد الحكماء: من قرأ كتابًا فقد عاش حياة إضافية. وفي هذا الكتاب حياةٌ كاملة بأفراحها وأحزانها، ببداياتها التي تشبه شروق الشمس ونهاياتها التي تشبه آخر نَفَسٍ من شمعة.",
-  "ليست الكلمات حروفًا تُرصف، بل أرواحٌ تتنفّس. حين تقرأها بقلبك، تسمع نبضها، وحين تقرأها بعقلك، ترى ضوءها يتسلّل إلى أعمق زوايا فكرك.",
-  "تعلّمنا من القدماء أن الحكمة لا تُورَث ولا تُشترى، بل تُلتقط كما يلتقط الطفل الصدفة من الشاطئ، بصبر وفرحٍ ودهشة.",
-  "وفي اللحظة التي يظنّ فيها القارئ أنه قد فهم كلّ شيء، يقلب صفحةً جديدة فيكتشف أن المعرفة بحرٌ بلا ساحل، وأنه ليس سوى قطرةٍ فيه تتعلّم الذوبان.",
-  "اسمع جيّدًا: في كلّ سطر دعوة، وفي كلّ فاصلة وقفة للتأمل، وفي كلّ نقطة بدايةٌ جديدة لمن يملك الشجاعة ليبدأ من جديد.",
-  "هذا الكتاب لا يطلب منك أن تسرع، بل أن تتمهّل؛ أن ترفع عينيك أحيانًا عن الصفحة لتتأمل أثر العبارة في القلب، ثم تعود وقد صار المعنى أكثر صفاءً ورسوخًا.",
-  "وحين تتكاثر الأسئلة، لا يقدّم النص أجوبة جاهزة بقدر ما يفتح نوافذ أوسع للبحث، حتى يشعر القارئ أن الرحلة في داخله لا تقل عمقًا عن الرحلة بين الصفحات.",
+  "تبدأ الحكاية حين تتفتح الكلمة الأولى كزهرةٍ في عتمة الفجر، فتعرف أن ما بين يديك ليس كتاباً عابراً، بل رفيقُ طريقٍ سيُسائلك مع كلّ صفحة.",
+  "لكلّ كتابٍ روحه التي تنبض بين السطور، وروح هذا الكتاب تشبه نسمةً تأتي من بعيد محمَّلةً برائحة المعنى الأصيل.",
+  "قال أحد القدماء: لا تقرأ لتعرف، بل اقرأ لتتغيّر. وفي هذه الصفحات دعوةٌ صريحة لأن تخرج منها غير الذي دخلت.",
+  "ليست الحكمة في كثرة الكلام، بل في الكلمة التي تستقرّ في القلب كما يستقرّ الحجر في قاع النهر، ثابتةً مهما جرى التيار فوقها.",
+  "تأمّل كيف تنسج الجمل خيوطها أمامك: لا شيء فيها مصادفة، بل كلّ فاصلةٍ موضعٌ للالتقاط النَّفَس، وكلّ نقطةٍ منعطفٌ للوعي.",
+  "حين يفتح المرء كتاباً صادقاً، يفتح في الحقيقة باباً على نفسه؛ يرى ما لم يكن يراه، ويسمع ما كان قلبه يهمس به في الخفاء.",
+  "للكتب أعمارٌ تتجاوز أصحابها، ولأصحابها أصواتٌ تظلّ تتردّد بين القرّاء وكأنّهم لم يغادروا قطّ.",
+  "في الصفحات الأولى تتعرّف على نفَس الكاتب، وفي الوسط تأنس به، وفي الخاتمة تكتشف أنّه صار جزءاً من ذاكرتك.",
+  "اعلم أنّ القراءة العميقة تشبه الحفر في بئرٍ قديمة: كلّ مجرفةٍ تكشف عن طبقةٍ من المعنى لم يصلها قارئٌ مستعجل.",
+  "هذه ليست كلماتٌ تُقرأ مرّةً واحدةً وتُنسى؛ إنّها أفكارٌ تطلب منك أن تعود إليها كما يعود المسافر إلى البيت بعد طول غياب.",
+  "في زحام العالم، يصير الكتاب الحقيقي ملاذاً، والصفحةُ التي تنحاز إليها صلاةً صامتة.",
+  "تذكّر دائماً: ليست كل العقول التي تكتب تترك أثراً، لكنّ كلّ قلبٍ صادق يَكتب يَترك في القرّاء بصمةً لا تُمحى.",
+  "ثمّة لحظاتٌ في القراءة تشعر فيها أنّ الكاتب قد عرفك قبل أن تعرفه، وأنّه كتب لأجلك أنت بالذات.",
+  "الكتب التي تستحقّ الإقامة في رفّك هي تلك التي تَطرح أسئلةً تظلّ معك بعد إغلاق الغلاف بزمنٍ طويل.",
+  "في كلّ فصلٍ منعطفٌ، وفي كلّ منعطفٍ امتحانٌ صغير للقارئ: هل سيمضي بسرعة، أم سيقف ليفهم؟",
+  "بعض الصفحات تُضيء كالشموع في غرفةٍ مظلمة، وبعضها يفتح نوافذ على عوالم لم تكن تدري أنّها موجودة في داخلك.",
+  "الفكرة الحقيقية لا تَفرض نفسها، بل تَتسلّل إلى الوعي على أطراف الأصابع، حتى إذا استقرّت لم تغادر.",
+  "خُذ وقتك في هذا الكتاب؛ ليست العبرة بإنهائه، بل بما يبقى منه فيك بعد سنوات.",
 ];
 
 const enParagraphs = [
-  "In the quiet hours before dawn, when the world still rests under a soft veil of light, a reader opens a book the way a traveler pushes a centuries-old door into a garden he has never visited. Each word blossoms; each line becomes a path between trees of meaning.",
-  "A wise man once said that to read a book is to live an extra life. Within these pages there is a complete life, with all its joys and sorrows, beginnings that feel like sunrise and endings that feel like the last breath of a candle.",
-  "Words are not merely letters arranged on a page; they are living souls that breathe. Read them with your heart, and you will hear their pulse; read them with your mind, and you will see their light slip into the deepest corners of your thought.",
-  "The ancients taught us that wisdom cannot be inherited or bought, but only gathered the way a child gathers seashells from the shore — with patience, joy, and quiet wonder.",
-  "Just when the reader believes everything has become clear, another page opens and reminds him that knowledge is a sea without shore, and he is learning, slowly, how to navigate it.",
-  "In every line there is an invitation, in every comma a pause for reflection, and in every full stop a new beginning for the one brave enough to begin again.",
+  "Some books arrive as quiet visitors; this one arrives as a companion you did not know you were waiting for.",
+  "The first pages of any honest work are a kind of contract: stay with me, the author says, and I will not waste your time.",
+  "Reading slowly is its own discipline. The lines that change a life are rarely the ones you raced past.",
+  "Every chapter is a small room with its own light. Take the time to notice what is hanging on its walls.",
+  "A real idea does not shout. It waits until the noise of your day has settled, then speaks in a voice you cannot ignore.",
+  "Books outlive their authors because they keep negotiating, in silence, with each new reader who opens them.",
+  "There is a particular pleasure in returning to a paragraph and discovering it has aged into something new.",
+  "Notice the rhythm of these sentences. Style is not decoration; it is the shape thought takes when it is honest.",
+  "Reading is a conversation across time. The dead speak to the living, and the living, if they listen, become wiser.",
+  "Underline what unsettles you. The discomfort is usually the beginning of understanding.",
+  "Great writing does not give you the world; it gives you a way of seeing it that you can carry back with you.",
+  "When the page resists you, slow down. The resistance is often where the meaning is hiding.",
+  "Each book worth reading asks a question its reader will spend years answering.",
+  "Hold the book lightly, but the ideas firmly. The object is paper; what it carries is not.",
+  "Some sentences are doors. Some are mirrors. The best ones are both at once.",
+  "Stay until the last page. Endings are where authors finally tell you what they meant from the start.",
 ];
 
 const frParagraphs = [
-  "Dans le silence précédant l'aube, lorsque le monde repose encore sous un voile de lumière, le lecteur ouvre son livre comme un voyageur pousse la porte centenaire d'un jardin qu'il n'a jamais visité. Chaque mot s'épanouit, chaque ligne devient un sentier entre les arbres du sens.",
-  "Un sage a dit qu'ouvrir un livre, c'est vivre une vie supplémentaire. Dans ces pages se trouve une vie entière, avec ses joies, ses peines, ses commencements pareils à l'aurore et ses fins semblables au dernier souffle d'une bougie.",
-  "Les mots ne sont pas de simples lettres alignées : ce sont des âmes qui respirent. Lisez-les avec le cœur, vous entendrez leur pouls ; lisez-les avec l'esprit, vous verrez leur lumière s'infiltrer au plus profond de votre pensée.",
-  "Les anciens nous ont appris que la sagesse ne s'hérite ni ne s'achète : elle se cueille, comme l'enfant ramasse des coquillages sur la plage, avec patience, joie et émerveillement.",
-  "Au moment précis où le lecteur croit avoir tout compris, il tourne une page de plus et découvre que la connaissance est une mer sans rivage, et qu'il n'en est qu'une goutte apprenant à se fondre.",
-  "Dans chaque ligne il y a une invitation, dans chaque virgule une pause de méditation, et dans chaque point un commencement nouveau pour celui qui ose recommencer.",
+  "Certains livres entrent dans la vie sans prévenir, et l'on comprend, dès les premières pages, qu'ils n'en sortiront plus.",
+  "Lire lentement est une forme de respect : envers soi-même autant qu'envers la pensée qui s'offre.",
+  "Chaque chapitre est une chambre éclairée différemment ; il faut s'y attarder pour en voir les murs.",
+  "Une vraie idée ne s'impose pas, elle attend que le bruit du monde se taise pour se faire entendre.",
+  "Un livre qui mérite d'être lu deux fois mérite d'abord d'être lu lentement.",
+  "Souligner ce qui dérange, c'est souvent marquer l'endroit exact où la compréhension va commencer.",
+  "Le style n'est pas un ornement : c'est la forme que prend la pensée lorsqu'elle est honnête.",
+  "Les livres survivent à leurs auteurs parce qu'ils continuent, en silence, à parler à chaque nouveau lecteur.",
+  "Tenir le livre légèrement, mais les idées fermement : l'objet est de papier, ce qu'il porte ne l'est pas.",
+  "Certaines phrases sont des portes, d'autres des miroirs ; les plus belles sont les deux à la fois.",
+  "Reste jusqu'à la dernière page : c'est là que l'auteur dit enfin ce qu'il voulait dire depuis le début.",
+  "Quand le texte résiste, ralentis : la résistance est presque toujours le lieu du sens.",
 ];
 
 const esParagraphs = [
-  "En el silencio que precede al alba, cuando el mundo aún descansa bajo un velo de luz, el lector abre su libro como un viajero empuja la puerta centenaria de un jardín nunca visitado. Cada palabra florece, cada línea se vuelve un sendero entre árboles de significado.",
-  "Dijo un sabio que abrir un libro es vivir una vida adicional. En estas páginas hay una vida entera, con sus alegrías y tristezas, comienzos como amaneceres y finales como el último aliento de una vela.",
-  "Las palabras no son letras alineadas: son almas que respiran. Léelas con el corazón y escucharás su pulso; léelas con la mente y verás su luz colarse en los rincones más hondos de tu pensamiento.",
-  "Los antiguos nos enseñaron que la sabiduría no se hereda ni se compra: se recoge como el niño recoge caracolas en la orilla, con paciencia, alegría y asombro silencioso.",
-  "Y en el instante en que el lector cree haberlo comprendido todo, vuelve una página más y descubre que el conocimiento es un mar sin orilla, y él apenas una gota aprendiendo a disolverse.",
-  "En cada línea hay una invitación, en cada coma una pausa para meditar, y en cada punto un nuevo comienzo para quien se atreve a empezar de nuevo.",
+  "Algunos libros llegan en silencio y, desde la primera página, sabes que ya no se irán.",
+  "Leer despacio es una forma de respeto: hacia uno mismo y hacia el pensamiento que se ofrece.",
+  "Cada capítulo es una habitación con su propia luz; conviene detenerse para mirar sus paredes.",
+  "Una idea verdadera no se impone; espera a que el ruido del mundo calle para hacerse oír.",
+  "Subrayar lo que incomoda suele ser marcar el lugar exacto donde empieza la comprensión.",
+  "El estilo no es adorno: es la forma que toma el pensamiento cuando es honesto.",
+  "Los libros sobreviven a sus autores porque siguen conversando, en silencio, con cada nuevo lector.",
+  "Sostén el libro con suavidad, pero las ideas con firmeza: el objeto es papel, lo que lleva no lo es.",
+  "Algunas frases son puertas, otras son espejos; las mejores son ambas a la vez.",
+  "Quédate hasta la última página: ahí el autor dice por fin lo que quería decir desde el principio.",
+  "Cuando el texto se resiste, ve más despacio: la resistencia casi siempre es el lugar del sentido.",
 ];
 
 const paragraphsByLang: Record<Lang, string[]> = {
@@ -212,6 +248,62 @@ const chapterLabel: Record<Lang, (n: number) => string> = {
   es: (n) => `Capítulo ${n}`,
 };
 
+// Per-category opener so a religious book does not read like a children's book.
+const categoryOpener: Record<Lang, Record<Category, string>> = {
+  ar: {
+    religious: "يفتح هذا الكتاب باباً نحو معاني الإيمان والسكينة، ويأخذ قارئه في رحلة تأمّلٍ في النصّ والقلب معاً.",
+    philosophy: "يطرح هذا الكتاب أسئلةً جوهرية حول الوجود والمعرفة والمعنى، ويدعو إلى تفكيرٍ صبور لا يكتفي بالإجابات السهلة.",
+    children: "هذه قصّةٌ صُنعت بحبٍّ للصغار، تُحاكي خيالهم وتزرع فيهم قيماً تكبر معهم.",
+    stories: "مجموعةٌ من القصص القصيرة، كلّ واحدةٍ منها نافذةٌ على حياةٍ كاملة في صفحاتٍ معدودات.",
+    novels: "روايةٌ تأخذك من حياتك بهدوءٍ ثمّ تُعيدك إليها وقد تغيّر شيءٌ ما في طريقة نظرك للعالم.",
+    selfdev: "كتابٌ عمليّ لمن يبحث عن أدواتٍ حقيقية لتغيير عاداته وتحسين علاقته بنفسه وبالآخرين.",
+    trending: "من أكثر الكتب التي شغلت القرّاء مؤخّراً، يجمع بين عمق الفكرة وسلاسة الأسلوب.",
+    science: "كتابٌ يَعرض الحقائق العلمية بلغةٍ واضحة، ويربط المعرفة بالحياة اليومية للقارئ.",
+    truestory: "حكايةٌ حقيقيةٌ عاشها أصحابها قبل أن تُروى، وما يجعلها مؤثّرةً هو صدقها لا تَكلّفها.",
+    history: "رحلةٌ في الزمن تُعيد رسم وقائع وأحداث صنعت العالم كما نعرفه اليوم.",
+    marriage: "كتابٌ يتناول تفاصيل الحياة الزوجية بفهمٍ ولُطف، ويقدّم نصائح عملية لبناء علاقةٍ صحّية ومستقرّة.",
+  },
+  en: {
+    religious: "This book opens a doorway toward faith, stillness, and the meaning behind the text and the heart.",
+    philosophy: "A patient inquiry into existence, knowledge, and meaning — one that refuses the comfort of easy answers.",
+    children: "A story crafted with love for young readers, planting values that grow alongside them.",
+    stories: "A collection of short stories, each one a window into an entire life within a handful of pages.",
+    novels: "A novel that pulls you gently out of your life and returns you with your way of seeing quietly changed.",
+    selfdev: "A practical book for anyone looking for real tools to reshape habits and improve their relationship with self and others.",
+    trending: "One of the most discussed books of the moment, balancing depth of thought with clarity of voice.",
+    science: "A clear-eyed look at scientific ideas, connecting research to the texture of everyday life.",
+    truestory: "A true story lived before it was told. What moves the reader here is honesty, not performance.",
+    history: "A journey through time that redraws the events and forces that shaped the world we now inhabit.",
+    marriage: "A thoughtful look at married life, offering practical guidance for building a healthy, durable bond.",
+  },
+  fr: {
+    religious: "Ce livre ouvre une porte vers la foi, le silence intérieur et le sens caché dans le texte et le cœur.",
+    philosophy: "Une enquête patiente sur l'existence, la connaissance et le sens, refusant le confort des réponses faciles.",
+    children: "Une histoire écrite avec tendresse pour les jeunes lecteurs, semant des valeurs qui grandiront avec eux.",
+    stories: "Un recueil de nouvelles : chacune ouvre, en quelques pages, la fenêtre d'une vie entière.",
+    novels: "Un roman qui vous éloigne doucement de votre vie pour vous y ramener autrement.",
+    selfdev: "Un livre pratique pour qui cherche de vrais outils afin de transformer ses habitudes et ses relations.",
+    trending: "L'un des livres les plus commentés du moment, alliant profondeur et clarté.",
+    science: "Une approche claire des idées scientifiques, reliant la recherche au quotidien.",
+    truestory: "Une histoire vraie, vécue avant d'être racontée. Ce qui émeut, c'est la sincérité.",
+    history: "Un voyage dans le temps qui redessine les forces ayant façonné le monde actuel.",
+    marriage: "Un regard attentif sur la vie conjugale, avec des conseils pratiques pour bâtir un lien solide.",
+  },
+  es: {
+    religious: "Este libro abre una puerta hacia la fe, el silencio interior y el sentido que late en el texto y en el corazón.",
+    philosophy: "Una indagación paciente sobre la existencia, el saber y el sentido, sin conformarse con respuestas fáciles.",
+    children: "Una historia escrita con cariño para los más jóvenes, sembrando valores que crecerán con ellos.",
+    stories: "Una colección de relatos breves: cada uno, en pocas páginas, abre la ventana a una vida entera.",
+    novels: "Una novela que te aleja con suavidad de tu vida y te devuelve a ella con la mirada cambiada.",
+    selfdev: "Un libro práctico para quien busca herramientas reales para transformar sus hábitos y sus relaciones.",
+    trending: "Uno de los libros más comentados del momento, con profundidad y claridad.",
+    science: "Una mirada lúcida a las ideas científicas, conectando la investigación con la vida diaria.",
+    truestory: "Una historia verdadera, vivida antes que contada. Lo que conmueve aquí es la sinceridad.",
+    history: "Un viaje en el tiempo que redibuja las fuerzas que dieron forma al mundo de hoy.",
+    marriage: "Una mirada cuidadosa a la vida en pareja, con consejos prácticos para construir un vínculo duradero.",
+  },
+};
+
 function stableRating(title: string) {
   return Number((4.3 + (title.length % 7) * 0.1).toFixed(1));
 }
@@ -220,30 +312,66 @@ function pageCountForSeed(seed: Seed) {
   return pageCountByProfile[seed.pageProfile ?? defaultProfileByCategory[seed.category]];
 }
 
-function generatePages(seed: Pick<Seed, "title" | "author" | "language" | "category">, count: number): string[] {
-  const paras = paragraphsByLang[seed.language];
-  const pages: string[] = [];
+// Deterministic 32-bit hash so each book gets a unique, repeatable shuffle.
+function hashString(str: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
 
+// Tiny seeded PRNG (mulberry32).
+function makeRng(seed: number) {
+  let t = seed >>> 0;
+  return () => {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let r = t;
+    r = Math.imul(r ^ (r >>> 15), r | 1);
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled<T>(arr: T[], rng: () => number): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generatePages(
+  seed: Pick<Seed, "title" | "author" | "language" | "category"> & { description?: string },
+  count: number,
+): string[] {
+  const rng = makeRng(hashString(`${seed.title}::${seed.author}::${seed.category}`));
+  const pool = shuffled(paragraphsByLang[seed.language], rng);
+  const opener = categoryOpener[seed.language][seed.category];
+  const desc = seed.description?.trim();
+
+  let intro: string;
+  if (seed.language === "ar") {
+    intro = `كتاب «${seed.title}» للمؤلف ${seed.author}. ${opener}${desc ? `\n\nمن وصف الكتاب: ${desc}` : ""}`;
+  } else if (seed.language === "fr") {
+    intro = `« ${seed.title} » de ${seed.author}. ${opener}${desc ? `\n\nÀ propos du livre : ${desc}` : ""}`;
+  } else if (seed.language === "es") {
+    intro = `«${seed.title}» de ${seed.author}. ${opener}${desc ? `\n\nSobre el libro: ${desc}` : ""}`;
+  } else {
+    intro = `“${seed.title}” by ${seed.author}. ${opener}${desc ? `\n\nAbout this book: ${desc}` : ""}`;
+  }
+
+  const pages: string[] = [];
   for (let page = 0; page < count; page++) {
     const chapter = Math.floor(page / 2) + 1;
-    const p1 = paras[(page + 1) % paras.length];
-    const p2 = paras[(page * 2 + 2) % paras.length];
-    const p3 = paras[(page * 3 + 3) % paras.length];
-
     const heading = `${chapterLabel[seed.language](chapter)} — ${seed.title}`;
-
-    let intro = "";
-    if (seed.language === "ar") {
-      intro = `هذا المقطع من كتاب «${seed.title}» للمؤلف ${seed.author} ينتمي إلى ${arabicCategoryLabel[seed.category]}، ويُعرض هنا في صفحات مطوّلة لتجربة قراءة متصلة وسلسة داخل التطبيق.`;
-    } else if (seed.language === "fr") {
-      intro = `Cet extrait prolongé de « ${seed.title} » par ${seed.author} appartient à ${frenchCategoryLabel[seed.category]} et est présenté ici dans un format de lecture continue pour l'application.`;
-    } else if (seed.language === "es") {
-      intro = `Este fragmento ampliado de «${seed.title}» de ${seed.author} pertenece a ${spanishCategoryLabel[seed.category]} y aparece aquí en un formato continuo de lectura para la aplicación.`;
-    } else {
-      intro = `This extended reading page from “${seed.title}” by ${seed.author} belongs to ${englishCategoryLabel[seed.category]} and is presented here in a smooth, continuous in-app reading format.`;
-    }
-
-    pages.push(`${heading}\n\n${intro}\n\n${p1}\n\n${p2}\n\n${p3}`);
+    const p1 = pool[(page * 3) % pool.length];
+    const p2 = pool[(page * 3 + 1) % pool.length];
+    const p3 = pool[(page * 3 + 2) % pool.length];
+    const body = page === 0 ? `${intro}\n\n${p1}\n\n${p2}` : `${p1}\n\n${p2}\n\n${p3}`;
+    pages.push(`${heading}\n\n${body}`);
   }
 
   return pages;
