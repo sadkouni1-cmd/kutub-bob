@@ -397,7 +397,7 @@ const knownOriginalSources: Record<string, SourceInfo> = {
   [sourceKey("The Secret Garden", "en")]: gutenberg(113),
   [sourceKey("The Call of the Wild", "en")]: gutenberg(215),
   [sourceKey("The Jungle Book", "en")]: gutenberg(236),
-  [sourceKey("Little Women", "en")]: gutenberg(37106),
+  [sourceKey("Little Women", "en")]: gutenberg(514),
   [sourceKey("The Adventures of Sherlock Holmes", "en")]: gutenberg(1661),
   [sourceKey("Don Quixote", "en")]: gutenberg(996),
   [sourceKey("The Odyssey", "en")]: gutenberg(1727),
