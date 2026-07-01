@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Star, BookOpen, Heart } from "lucide-react";
+import { ArrowLeft, Star, BookOpen, Heart, ExternalLink, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BookReader } from "@/components/BookReader";
@@ -77,21 +77,43 @@ const BookDetail = () => {
                 <span className="ml-2 text-sm text-muted-foreground">{book.rating} / 5</span>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-muted-foreground">
-                <span>{book.pageCount} صفحة</span>
+                <span>{book.sourceUrl ? "مصدر أصلي موثّق" : `${book.pageCount} صفحة قيد التحقق`}</span>
+                {book.verifiedSource ? (
+                  <span className="inline-flex items-center gap-1 text-primary">
+                    <ShieldCheck className="h-4 w-4" /> {book.sourceName}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <AlertTriangle className="h-4 w-4" /> النص غير مفعل حتى التحقق
+                  </span>
+                )}
               </div>
               <p className={`mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed text-foreground/80 ${isRTL ? "font-arabic" : ""}`}>
                 {book.description}
               </p>
 
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
-                <Button
-                  size="lg"
-                  onClick={() => setReading(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[140px]"
-                >
-                  <BookOpen className="h-5 w-5 mr-2" />
-                  اقرأ الكتاب
-                </Button>
+                {book.sourceUrl ? (
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[170px]"
+                  >
+                    <a href={book.sourceUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-5 w-5 mr-2" />
+                      فتح المصدر الأصلي
+                    </a>
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    onClick={() => setReading(true)}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[170px]"
+                  >
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    حالة التحقق
+                  </Button>
+                )}
                 <Button
                   size="lg"
                   variant="outline"
@@ -111,7 +133,9 @@ const BookDetail = () => {
                 <h2 className={`font-display text-xl sm:text-2xl md:text-3xl text-primary truncate ${isRTL ? "font-arabic" : ""}`}>
                   {book.title}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">{book.pageCount} صفحة كاملة</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  {book.sourceUrl ? `مصدر أصلي: ${book.sourceName}` : "النص الكامل غير مفعل حتى التحقق من مصدر أصلي"}
+                </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setReading(false)} className="shrink-0">
                 إغلاق

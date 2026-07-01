@@ -321,7 +321,19 @@ function pageCountForSeed(seed: Seed) {
 type SourceInfo = { sourceUrl: string; sourceName: string; verifiedSource: true };
 
 const normalizeSourceKey = (value: string) =>
-  normalize(value)
+  value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
+    .replace(/[إأآا]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
     .replace(/\btranslated\b/g, "")
     .replace(/\bمترجم\b/g, "")
     .replace(/\bمختارات\b/g, "")
@@ -3348,7 +3360,7 @@ const marriageSeeds: Seed[] = [
 allSeeds.push(...marriageSeeds);
 
 
-export const books: Book[] = allSeeds.map((seed, index) => ({
+export const books: Book[] = dedupeSeeds(allSeeds).map((seed, index) => ({
   id: String(index + 1),
   title: seed.title,
   author: seed.author,
@@ -3357,10 +3369,13 @@ export const books: Book[] = allSeeds.map((seed, index) => ({
   cover: seed.cover ?? coverFor(seed.category),
   description: seed.description,
   pages: [],
-  pageCount: pageCountForSeed(seed),
+  pageCount: seed.sourceUrl ? 1 : pageCountForSeed(seed),
   duration: seed.duration,
   rating: seed.rating ?? stableRating(seed.title),
   illustration: seed.illustration,
+  sourceUrl: seed.sourceUrl,
+  sourceName: seed.sourceName,
+  verifiedSource: seed.verifiedSource,
 }));
 
 const fullBookCache = new Map<string, Book>();
