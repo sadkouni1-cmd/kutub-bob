@@ -30,6 +30,9 @@ export interface Book {
   duration?: string;
   rating: number;
   illustration?: string;
+  sourceUrl?: string;
+  sourceName?: string;
+  verifiedSource?: boolean;
 }
 
 interface Seed {
@@ -43,6 +46,9 @@ interface Seed {
   pageProfile?: PageProfile;
   cover?: string;
   illustration?: string;
+  sourceUrl?: string;
+  sourceName?: string;
+  verifiedSource?: boolean;
 }
 
 export const categories: { id: Category; label: string; labelEn: string; color: string; icon: string }[] = [
@@ -312,6 +318,148 @@ function pageCountForSeed(seed: Seed) {
   return pageCountByProfile[seed.pageProfile ?? defaultProfileByCategory[seed.category]];
 }
 
+type SourceInfo = { sourceUrl: string; sourceName: string; verifiedSource: true };
+
+const normalizeSourceKey = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
+    .replace(/[إأآا]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\btranslated\b/g, "")
+    .replace(/\bمترجم\b/g, "")
+    .replace(/\bمختارات\b/g, "")
+    .replace(/\bمختصر\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const cleanTitleForSource = (title: string) =>
+  title
+    .replace(/[\(（].*?[\)）]/g, "")
+    .replace(/[\u061C\u200E\u200F]/g, "")
+    .split("—")[0]
+    .split("-")[0]
+    .trim();
+
+const sourceKey = (title: string, language: Lang) => `${language}:${normalizeSourceKey(cleanTitleForSource(title))}`;
+const gutenberg = (id: number): SourceInfo => ({ sourceUrl: `https://www.gutenberg.org/ebooks/${id}`, sourceName: "Project Gutenberg", verifiedSource: true });
+const wikiSource = (lang: "ar" | "fr" | "es", page: string): SourceInfo => ({
+  sourceUrl: `https://${lang}.wikisource.org/wiki/${encodeURIComponent(page.replace(/ /g, "_"))}`,
+  sourceName: lang === "ar" ? "ويكي مصدر" : "Wikisource",
+  verifiedSource: true,
+});
+
+const knownOriginalSources: Record<string, SourceInfo> = {
+  // Arabic public-domain classics
+  [sourceKey("مقدمة ابن خلدون", "ar")]: wikiSource("ar", "مقدمة ابن خلدون"),
+  [sourceKey("البخلاء", "ar")]: wikiSource("ar", "البخلاء"),
+  [sourceKey("حي بن يقظان", "ar")]: wikiSource("ar", "حي بن يقظان"),
+  [sourceKey("طوق الحمامة", "ar")]: wikiSource("ar", "طوق الحمامة"),
+  [sourceKey("رسالة الغفران", "ar")]: wikiSource("ar", "رسالة الغفران"),
+  [sourceKey("كليلة ودمنة", "ar")]: wikiSource("ar", "كليلة ودمنة"),
+  [sourceKey("ألف ليلة وليلة", "ar")]: wikiSource("ar", "ألف ليلة وليلة"),
+  [sourceKey("السيرة النبوية", "ar")]: wikiSource("ar", "السيرة النبوية لابن هشام"),
+  [sourceKey("السيرة النبوية لابن هشام", "ar")]: wikiSource("ar", "السيرة النبوية لابن هشام"),
+
+  // English public-domain originals
+  [sourceKey("Pride and Prejudice", "en")]: gutenberg(1342),
+  [sourceKey("Jane Eyre", "en")]: gutenberg(1260),
+  [sourceKey("Wuthering Heights", "en")]: gutenberg(768),
+  [sourceKey("Anna Karenina", "en")]: gutenberg(1399),
+  [sourceKey("War and Peace", "en")]: gutenberg(2600),
+  [sourceKey("The Great Gatsby", "en")]: gutenberg(64317),
+  [sourceKey("Moby-Dick", "en")]: gutenberg(2701),
+  [sourceKey("Alice's Adventures in Wonderland", "en")]: gutenberg(11),
+  [sourceKey("Alice in Wonderland", "en")]: gutenberg(11),
+  [sourceKey("The Prince", "en")]: gutenberg(1232),
+  [sourceKey("Meditations", "en")]: gutenberg(2680),
+  [sourceKey("Frankenstein", "en")]: gutenberg(84),
+  [sourceKey("Dracula", "en")]: gutenberg(345),
+  [sourceKey("The Picture of Dorian Gray", "en")]: gutenberg(174),
+  [sourceKey("A Tale of Two Cities", "en")]: gutenberg(98),
+  [sourceKey("Oliver Twist", "en")]: gutenberg(730),
+  [sourceKey("Les Misérables", "en")]: gutenberg(135),
+  [sourceKey("The Count of Monte Cristo", "en")]: gutenberg(1184),
+  [sourceKey("The Three Musketeers", "en")]: gutenberg(1257),
+  [sourceKey("Around the World in Eighty Days", "en")]: gutenberg(103),
+  [sourceKey("Twenty Thousand Leagues Under the Seas", "en")]: gutenberg(164),
+  [sourceKey("Twenty Thousand Leagues Under the Sea", "en")]: gutenberg(164),
+  [sourceKey("The Time Machine", "en")]: gutenberg(35),
+  [sourceKey("The War of the Worlds", "en")]: gutenberg(36),
+  [sourceKey("The Secret Garden", "en")]: gutenberg(113),
+  [sourceKey("The Call of the Wild", "en")]: gutenberg(215),
+  [sourceKey("The Jungle Book", "en")]: gutenberg(236),
+  [sourceKey("Little Women", "en")]: gutenberg(514),
+  [sourceKey("The Adventures of Sherlock Holmes", "en")]: gutenberg(1661),
+  [sourceKey("Don Quixote", "en")]: gutenberg(996),
+  [sourceKey("The Odyssey", "en")]: gutenberg(1727),
+  [sourceKey("The Iliad", "en")]: gutenberg(6130),
+  [sourceKey("The Histories", "en")]: gutenberg(2707),
+  [sourceKey("The History of the Peloponnesian War", "en")]: gutenberg(7142),
+  [sourceKey("The Decline and Fall of the Roman Empire", "en")]: gutenberg(25717),
+
+  // French originals on Wikisource
+  [sourceKey("Les Misérables", "fr")]: wikiSource("fr", "Les Misérables"),
+  [sourceKey("Madame Bovary", "fr")]: wikiSource("fr", "Madame Bovary"),
+  [sourceKey("Le Rouge et le Noir", "fr")]: wikiSource("fr", "Le Rouge et le Noir"),
+  [sourceKey("Germinal", "fr")]: wikiSource("fr", "Germinal"),
+  [sourceKey("L'Assommoir", "fr")]: wikiSource("fr", "L’Assommoir"),
+  [sourceKey("Nana", "fr")]: wikiSource("fr", "Nana"),
+  [sourceKey("Bel-Ami", "fr")]: wikiSource("fr", "Bel-Ami"),
+  [sourceKey("Une vie", "fr")]: wikiSource("fr", "Une vie"),
+  [sourceKey("Le Père Goriot", "fr")]: wikiSource("fr", "Le Père Goriot"),
+  [sourceKey("Eugénie Grandet", "fr")]: wikiSource("fr", "Eugénie Grandet"),
+  [sourceKey("Discours de la méthode", "fr")]: wikiSource("fr", "Discours de la méthode"),
+  [sourceKey("Du contrat social", "fr")]: wikiSource("fr", "Du contrat social"),
+  [sourceKey("Les Essais", "fr")]: wikiSource("fr", "Essais"),
+  [sourceKey("Les Confessions", "fr")]: wikiSource("fr", "Les Confessions"),
+  [sourceKey("Le Tour du monde en 80 jours", "fr")]: wikiSource("fr", "Le Tour du monde en quatre-vingts jours"),
+  [sourceKey("Vingt mille lieues sous les mers", "fr")]: wikiSource("fr", "Vingt mille lieues sous les mers"),
+  [sourceKey("Voyage au centre de la Terre", "fr")]: wikiSource("fr", "Voyage au centre de la Terre"),
+  [sourceKey("Le Comte de Monte-Cristo", "fr")]: wikiSource("fr", "Le Comte de Monte-Cristo"),
+  [sourceKey("Les Trois Mousquetaires", "fr")]: wikiSource("fr", "Les Trois Mousquetaires"),
+
+  // Spanish public-domain classics
+  [sourceKey("Don Quijote de la Mancha", "es")]: wikiSource("es", "Don Quijote de la Mancha"),
+  [sourceKey("El ingenioso hidalgo don Quijote de la Mancha", "es")]: wikiSource("es", "Don Quijote de la Mancha"),
+  [sourceKey("Comentarios reales de los Incas", "es")]: wikiSource("es", "Comentarios reales"),
+};
+
+function withOriginalSource(seed: Seed): Seed {
+  if (seed.sourceUrl) return { ...seed, verifiedSource: true };
+  const known = knownOriginalSources[sourceKey(seed.title, seed.language)];
+  return known ? { ...seed, ...known } : seed;
+}
+
+function dedupeSeeds(seeds: Seed[]): Seed[] {
+  const unique = new Map<string, Seed>();
+
+  for (const rawSeed of seeds) {
+    const seed = withOriginalSource(rawSeed);
+    const key = `${sourceKey(seed.title, seed.language)}:${normalizeSourceKey(seed.author)}`;
+    const existing = unique.get(key);
+
+    if (!existing) {
+      unique.set(key, seed);
+      continue;
+    }
+
+    if (!existing.sourceUrl && seed.sourceUrl) {
+      unique.set(key, { ...existing, ...seed, category: existing.category });
+    }
+  }
+
+  return Array.from(unique.values());
+}
+
 // Deterministic 32-bit hash so each book gets a unique, repeatable shuffle.
 function hashString(str: string): number {
   let h = 2166136261 >>> 0;
@@ -344,37 +492,34 @@ function shuffled<T>(arr: T[], rng: () => number): T[] {
 }
 
 function generatePages(
-  seed: Pick<Seed, "title" | "author" | "language" | "category"> & { description?: string },
+  seed: Pick<Seed, "title" | "author" | "language" | "category" | "sourceUrl" | "sourceName" | "verifiedSource"> & { description?: string },
   count: number,
 ): string[] {
-  const rng = makeRng(hashString(`${seed.title}::${seed.author}::${seed.category}`));
-  const pool = shuffled(paragraphsByLang[seed.language], rng);
-  const opener = categoryOpener[seed.language][seed.category];
   const desc = seed.description?.trim();
 
-  let intro: string;
+  if (seed.sourceUrl) {
+    if (seed.language === "ar") {
+      return [`النص الأصلي الموثّق — ${seed.title}\n\nتم ربط هذا الكتاب بمصدره الأصلي: ${seed.sourceName ?? "مصدر موثّق"}.\n\nلا نعرض نصاً مولّداً أو مكرراً داخل القارئ. لقراءة الكتاب كما هو، اضغط زر «فتح المصدر الأصلي» في صفحة الكتاب.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
+    }
+    if (seed.language === "fr") {
+      return [`Source originale vérifiée — ${seed.title}\n\nCe livre est relié à sa source originale : ${seed.sourceName ?? "source vérifiée"}.\n\nAucun texte généré ou répété n'est affiché ici. Ouvrez la source originale depuis la page du livre pour lire le texte fiable.\n\n${desc ? `Description : ${desc}` : ""}`];
+    }
+    if (seed.language === "es") {
+      return [`Fuente original verificada — ${seed.title}\n\nEste libro está vinculado a su fuente original: ${seed.sourceName ?? "fuente verificada"}.\n\nNo mostramos texto generado ni repetido. Abre la fuente original desde la página del libro para leer el texto fiable.\n\n${desc ? `Descripción: ${desc}` : ""}`];
+    }
+    return [`Verified original source — ${seed.title}\n\nThis book is linked to its original source: ${seed.sourceName ?? "verified source"}.\n\nNo generated or repeated text is displayed here. Open the original source from the book page to read the reliable text.\n\n${desc ? `Description: ${desc}` : ""}`];
+  }
+
   if (seed.language === "ar") {
-    intro = `كتاب «${seed.title}» للمؤلف ${seed.author}. ${opener}${desc ? `\n\nمن وصف الكتاب: ${desc}` : ""}`;
-  } else if (seed.language === "fr") {
-    intro = `« ${seed.title} » de ${seed.author}. ${opener}${desc ? `\n\nÀ propos du livre : ${desc}` : ""}`;
-  } else if (seed.language === "es") {
-    intro = `«${seed.title}» de ${seed.author}. ${opener}${desc ? `\n\nSobre el libro: ${desc}` : ""}`;
-  } else {
-    intro = `“${seed.title}” by ${seed.author}. ${opener}${desc ? `\n\nAbout this book: ${desc}` : ""}`;
+    return [`النص قيد التحقق — ${seed.title}\n\nأوقفنا عرض الصفحات المولّدة لهذا الكتاب حتى لا يظهر محتوى مكرر أو غير صحيح.\n\nسيبقى الكتاب في الفهرس، لكن القراءة الكاملة لن تُفعّل إلا بعد ربطه بمصدر أصلي موثّق وقانوني.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
   }
-
-  const pages: string[] = [];
-  for (let page = 0; page < count; page++) {
-    const chapter = Math.floor(page / 2) + 1;
-    const heading = `${chapterLabel[seed.language](chapter)} — ${seed.title}`;
-    const p1 = pool[(page * 3) % pool.length];
-    const p2 = pool[(page * 3 + 1) % pool.length];
-    const p3 = pool[(page * 3 + 2) % pool.length];
-    const body = page === 0 ? `${intro}\n\n${p1}\n\n${p2}` : `${p1}\n\n${p2}\n\n${p3}`;
-    pages.push(`${heading}\n\n${body}`);
+  if (seed.language === "fr") {
+    return [`Texte en cours de vérification — ${seed.title}\n\nLe contenu généré a été désactivé pour éviter les répétitions et les textes incorrects.\n\nLa lecture complète sera activée après liaison à une source originale vérifiée et légale.\n\n${desc ? `Description : ${desc}` : ""}`];
   }
-
-  return pages;
+  if (seed.language === "es") {
+    return [`Texto en verificación — ${seed.title}\n\nSe desactivó el contenido generado para evitar repeticiones y textos incorrectos.\n\nLa lectura completa se activará cuando se vincule una fuente original verificada y legal.\n\n${desc ? `Descripción: ${desc}` : ""}`];
+  }
+  return [`Text under verification — ${seed.title}\n\nGenerated reading pages were disabled to avoid duplicated or incorrect content.\n\nFull reading will be enabled after this title is linked to a verified, legal original source.\n\n${desc ? `Description: ${desc}` : ""}`];
 }
 
 const arabicAudiobookTitles: Array<[string, string, string]> = [
@@ -3217,7 +3362,7 @@ const marriageSeeds: Seed[] = [
 allSeeds.push(...marriageSeeds);
 
 
-export const books: Book[] = allSeeds.map((seed, index) => ({
+export const books: Book[] = dedupeSeeds(allSeeds).map((seed, index) => ({
   id: String(index + 1),
   title: seed.title,
   author: seed.author,
@@ -3226,10 +3371,13 @@ export const books: Book[] = allSeeds.map((seed, index) => ({
   cover: seed.cover ?? coverFor(seed.category),
   description: seed.description,
   pages: [],
-  pageCount: pageCountForSeed(seed),
+  pageCount: seed.sourceUrl ? 1 : pageCountForSeed(seed),
   duration: seed.duration,
   rating: seed.rating ?? stableRating(seed.title),
   illustration: seed.illustration,
+  sourceUrl: seed.sourceUrl,
+  sourceName: seed.sourceName,
+  verifiedSource: seed.verifiedSource,
 }));
 
 const fullBookCache = new Map<string, Book>();
