@@ -402,7 +402,9 @@ const knownOriginalSources: Record<string, SourceInfo> = {
   [sourceKey("Don Quixote", "en")]: gutenberg(996),
   [sourceKey("The Odyssey", "en")]: gutenberg(1727),
   [sourceKey("The Iliad", "en")]: gutenberg(6130),
-  [sourceKey("The Old Man and the Sea", "en")]: gutenberg(10584),
+  [sourceKey("The Histories", "en")]: gutenberg(2707),
+  [sourceKey("The History of the Peloponnesian War", "en")]: gutenberg(7142),
+  [sourceKey("The Decline and Fall of the Roman Empire", "en")]: gutenberg(25717),
 
   // French originals on Wikisource
   [sourceKey("Les Misérables", "fr")]: wikiSource("fr", "Les Misérables"),
