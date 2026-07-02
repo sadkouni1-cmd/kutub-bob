@@ -145,6 +145,30 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Source filter: full text vs AI summary */}
+        <div className="mb-8 sm:mb-12 flex flex-wrap items-center gap-2">
+          <span className="text-xs sm:text-sm text-muted-foreground mr-1 sm:mr-2">النوع:</span>
+          {([
+            { id: "all", label: "الكل", icon: "📚" },
+            { id: "full", label: "كتب كاملة", icon: "✅" },
+            { id: "summary", label: "ملخّصات ذكية", icon: "✨" },
+          ] as const).map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setActiveSource(s.id)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs sm:text-sm transition-smooth border flex items-center gap-1.5",
+                activeSource === s.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span>{s.icon}</span>
+              <span>{s.label}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Books grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-16 sm:py-20 text-muted-foreground">
