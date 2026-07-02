@@ -12,12 +12,14 @@ const BOOKS_PER_BATCH = 48;
 const Index = () => {
   const [activeCat, setActiveCat] = useState<Category | "all">("all");
   const [activeLang, setActiveLang] = useState<Lang | "all">("all");
+  const [activeSource, setActiveSource] = useState<"all" | "full" | "summary">("all");
   const [search, setSearch] = useState("");
   const [, startTransition] = useTransition();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_BOOKS);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const deferredActiveCat = useDeferredValue(activeCat);
   const deferredActiveLang = useDeferredValue(activeLang);
+  const deferredActiveSource = useDeferredValue(activeSource);
   const deferredSearch = useDeferredValue(search);
 
   const handleSearch = useCallback((value: string) => {
@@ -26,13 +28,15 @@ const Index = () => {
 
   const filtered = useMemo(() => {
     const base = deferredSearch.trim() ? quickSearchBooks(deferredSearch) : books;
-    if (deferredActiveCat === "all" && deferredActiveLang === "all") return base;
+    if (deferredActiveCat === "all" && deferredActiveLang === "all" && deferredActiveSource === "all") return base;
     return base.filter((b) => {
       if (deferredActiveCat !== "all" && b.category !== deferredActiveCat) return false;
       if (deferredActiveLang !== "all" && b.language !== deferredActiveLang) return false;
+      if (deferredActiveSource === "full" && !b.verifiedSource) return false;
+      if (deferredActiveSource === "summary" && b.verifiedSource) return false;
       return true;
     });
-  }, [deferredActiveCat, deferredActiveLang, deferredSearch]);
+  }, [deferredActiveCat, deferredActiveLang, deferredActiveSource, deferredSearch]);
 
   useEffect(() => {
     setVisibleCount(Math.min(INITIAL_VISIBLE_BOOKS, filtered.length));
@@ -137,6 +141,30 @@ const Index = () => {
             >
               <span>{l.flag}</span>
               <span>{l.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Source filter: full text vs AI summary */}
+        <div className="mb-8 sm:mb-12 flex flex-wrap items-center gap-2">
+          <span className="text-xs sm:text-sm text-muted-foreground mr-1 sm:mr-2">النوع:</span>
+          {([
+            { id: "all", label: "الكل", icon: "📚" },
+            { id: "full", label: "كتب كاملة", icon: "✅" },
+            { id: "summary", label: "ملخّصات ذكية", icon: "✨" },
+          ] as const).map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setActiveSource(s.id)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs sm:text-sm transition-smooth border flex items-center gap-1.5",
+                activeSource === s.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span>{s.icon}</span>
+              <span>{s.label}</span>
             </button>
           ))}
         </div>
