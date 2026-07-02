@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Star, BookOpen, Heart, ExternalLink, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Star, BookOpen, Heart, ExternalLink, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BookReader } from "@/components/BookReader";
 import { getBook, languages } from "@/data/books";
 import { useIsFavorite, toggleFavorite } from "@/lib/library-storage";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const BookDetail = () => {
   const { id } = useParams();
   const book = getBook(id ?? "");
   const fav = useIsFavorite(book?.id ?? "");
   const [reading, setReading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pages, setPages] = useState<string[] | null>(null);
+  const [source, setSource] = useState<string | null>(null);
 
   if (!book) {
     return (
@@ -26,6 +31,39 @@ const BookDetail = () => {
 
   const isRTL = book.language === "ar";
   const lang = languages.find((l) => l.id === book.language);
+
+  const loadAndRead = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-book-content", {
+        body: {
+          bookId: book.id,
+          title: book.title,
+          author: book.author,
+          language: book.language,
+          category: book.category,
+          description: book.description,
+          sourceUrl: book.sourceUrl,
+        },
+      });
+      if (error) throw error;
+      if (!data?.pages?.length) throw new Error("لا يوجد محتوى");
+      setPages(data.pages as string[]);
+      setSource(data.source as string);
+      setReading(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذر جلب المحتوى";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sourceLabel = source === "gutenberg"
+    ? "النص الكامل من Project Gutenberg"
+    : source === "wikisource"
+    ? "النص الكامل من ويكي مصدر"
+    : "ملخّص تفصيلي بالذكاء الاصطناعي";
 
   return (
     <div className="min-h-screen">
@@ -76,42 +114,40 @@ const BookDetail = () => {
                 ))}
                 <span className="ml-2 text-sm text-muted-foreground">{book.rating} / 5</span>
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-muted-foreground">
-                <span>{book.sourceUrl ? "مصدر أصلي موثّق" : `${book.pageCount} صفحة قيد التحقق`}</span>
-                {book.verifiedSource ? (
-                  <span className="inline-flex items-center gap-1 text-primary">
-                    <ShieldCheck className="h-4 w-4" /> {book.sourceName}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-muted-foreground">
-                    <AlertTriangle className="h-4 w-4" /> النص غير مفعل حتى التحقق
-                  </span>
-                )}
-              </div>
+              {book.verifiedSource && (
+                <div className="mt-3 inline-flex items-center gap-1 text-primary text-sm">
+                  <ShieldCheck className="h-4 w-4" /> {book.sourceName}
+                </div>
+              )}
               <p className={`mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed text-foreground/80 ${isRTL ? "font-arabic" : ""}`}>
                 {book.description}
               </p>
 
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
-                {book.sourceUrl ? (
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[170px]"
-                  >
+                <Button
+                  size="lg"
+                  onClick={loadAndRead}
+                  disabled={loading}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[190px]"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      جاري تحضير الكتاب...
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      قراءة الكتاب
+                    </>
+                  )}
+                </Button>
+                {book.sourceUrl && (
+                  <Button asChild size="lg" variant="secondary" className="font-display h-11 sm:h-12">
                     <a href={book.sourceUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-5 w-5 mr-2" />
-                      فتح المصدر الأصلي
+                      المصدر الأصلي
                     </a>
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    onClick={() => setReading(true)}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-sm sm:text-base shadow-book h-11 sm:h-12 flex-1 sm:flex-none min-w-[170px]"
-                  >
-                    <BookOpen className="h-5 w-5 mr-2" />
-                    حالة التحقق
                   </Button>
                 )}
                 <Button
@@ -124,6 +160,9 @@ const BookDetail = () => {
                   {fav ? "في المفضلة" : "أضف للمفضلة"}
                 </Button>
               </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                يتم جلب النص من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي عالي الجودة. يُحفظ المحتوى ليكون فوريًا في المرات القادمة.
+              </p>
             </div>
           </div>
         ) : (
@@ -133,15 +172,19 @@ const BookDetail = () => {
                 <h2 className={`font-display text-xl sm:text-2xl md:text-3xl text-primary truncate ${isRTL ? "font-arabic" : ""}`}>
                   {book.title}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  {book.sourceUrl ? `مصدر أصلي: ${book.sourceName}` : "النص الكامل غير مفعل حتى التحقق من مصدر أصلي"}
-                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">{sourceLabel}</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setReading(false)} className="shrink-0">
                 إغلاق
               </Button>
             </div>
-            <BookReader pages={book.pages} isRTL={isRTL} bookId={book.id} language={book.language} illustration={book.illustration} />
+            <BookReader
+              pages={pages ?? book.pages}
+              isRTL={isRTL}
+              bookId={book.id}
+              language={book.language}
+              illustration={book.illustration}
+            />
           </div>
         )}
       </div>
