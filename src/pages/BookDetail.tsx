@@ -143,11 +143,18 @@ const BookDetail = () => {
                 ))}
                 <span className="ml-2 text-sm text-muted-foreground">{book.rating} / 5</span>
               </div>
-              {book.verifiedSource && (
-                <div className="mt-3 inline-flex items-center gap-1 text-primary text-sm">
-                  <ShieldCheck className="h-4 w-4" /> {book.sourceName}
-                </div>
-              )}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {book.verifiedSource && (
+                  <span className="inline-flex items-center gap-1 text-primary text-sm">
+                    <ShieldCheck className="h-4 w-4" /> {book.sourceName}
+                  </span>
+                )}
+                {hasCache && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs">
+                    <WifiOff className="h-3 w-3" /> محفوظ للقراءة بدون إنترنت
+                  </span>
+                )}
+              </div>
               <p className={`mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed text-foreground/80 ${isRTL ? "font-arabic" : ""}`}>
                 {book.description}
               </p>
