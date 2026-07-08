@@ -35,6 +35,21 @@ const BookDetail = () => {
   const lang = languages.find((l) => l.id === book.language);
 
   const loadAndRead = async () => {
+    // 1) Try offline cache first — instant, no network needed.
+    const local = getCachedContent(book.id);
+    if (local?.pages?.length) {
+      setPages(local.pages);
+      setSource(local.source);
+      setReading(true);
+      return;
+    }
+
+    // 2) Need internet to fetch/generate content the first time.
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      toast.error("هذا الكتاب غير محفوظ بعد. يلزم الاتصال بالإنترنت لتحميله أول مرة.");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("get-book-content", {
@@ -50,9 +65,14 @@ const BookDetail = () => {
       });
       if (error) throw error;
       if (!data?.pages?.length) throw new Error("لا يوجد محتوى");
-      setPages(data.pages as string[]);
-      setSource(data.source as string);
+      const nextPages = data.pages as string[];
+      const nextSource = data.source as string;
+      setPages(nextPages);
+      setSource(nextSource);
+      saveCachedContent(book.id, nextPages, nextSource);
+      setHasCache(true);
       setReading(true);
+      toast.success("تم حفظ الكتاب على جهازك للقراءة بدون إنترنت");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "تعذر جلب المحتوى";
       toast.error(msg);
@@ -60,6 +80,13 @@ const BookDetail = () => {
       setLoading(false);
     }
   };
+
+  const removeOffline = () => {
+    removeCachedContent(book.id);
+    setHasCache(false);
+    toast.success("تم حذف النسخة المحفوظة");
+  };
+
 
   const sourceLabel = source === "gutenberg"
     ? "النص الكامل من Project Gutenberg"
