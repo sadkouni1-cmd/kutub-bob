@@ -2,6 +2,52 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 const FAVORITES_KEY = "rwb:favorites";
 const PROGRESS_KEY = "rwb:progress";
+const CONTENT_PREFIX = "rwb:content:";
+
+export interface CachedContent {
+  pages: string[];
+  source: string;
+  savedAt: number;
+}
+
+export const getCachedContent = (id: string): CachedContent | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CONTENT_PREFIX + id);
+    return raw ? (JSON.parse(raw) as CachedContent) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveCachedContent = (id: string, pages: string[], source: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      CONTENT_PREFIX + id,
+      JSON.stringify({ pages, source, savedAt: Date.now() } satisfies CachedContent),
+    );
+  } catch {
+    /* quota exceeded — ignore */
+  }
+};
+
+export const removeCachedContent = (id: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(CONTENT_PREFIX + id);
+  } catch { /* ignore */ }
+};
+
+export const listCachedBookIds = (): string[] => {
+  if (typeof window === "undefined") return [];
+  const ids: string[] = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const k = window.localStorage.key(i);
+    if (k && k.startsWith(CONTENT_PREFIX)) ids.push(k.slice(CONTENT_PREFIX.length));
+  }
+  return ids;
+};
 
 export interface BookProgress {
   spread: number;

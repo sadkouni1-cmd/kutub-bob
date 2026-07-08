@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Star, BookOpen, Heart, ExternalLink, ShieldCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, Star, BookOpen, Heart, ExternalLink, ShieldCheck, Loader2, WifiOff, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BookReader } from "@/components/BookReader";
 import { getBook, languages } from "@/data/books";
-import { useIsFavorite, toggleFavorite } from "@/lib/library-storage";
+import { useIsFavorite, toggleFavorite, getCachedContent, saveCachedContent, removeCachedContent } from "@/lib/library-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -17,6 +17,8 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(false);
   const [pages, setPages] = useState<string[] | null>(null);
   const [source, setSource] = useState<string | null>(null);
+  const cached = book ? getCachedContent(book.id) : null;
+  const [hasCache, setHasCache] = useState<boolean>(!!cached);
 
   if (!book) {
     return (
@@ -33,6 +35,21 @@ const BookDetail = () => {
   const lang = languages.find((l) => l.id === book.language);
 
   const loadAndRead = async () => {
+    // 1) Try offline cache first — instant, no network needed.
+    const local = getCachedContent(book.id);
+    if (local?.pages?.length) {
+      setPages(local.pages);
+      setSource(local.source);
+      setReading(true);
+      return;
+    }
+
+    // 2) Need internet to fetch/generate content the first time.
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      toast.error("هذا الكتاب غير محفوظ بعد. يلزم الاتصال بالإنترنت لتحميله أول مرة.");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("get-book-content", {
@@ -48,9 +65,14 @@ const BookDetail = () => {
       });
       if (error) throw error;
       if (!data?.pages?.length) throw new Error("لا يوجد محتوى");
-      setPages(data.pages as string[]);
-      setSource(data.source as string);
+      const nextPages = data.pages as string[];
+      const nextSource = data.source as string;
+      setPages(nextPages);
+      setSource(nextSource);
+      saveCachedContent(book.id, nextPages, nextSource);
+      setHasCache(true);
       setReading(true);
+      toast.success("تم حفظ الكتاب على جهازك للقراءة بدون إنترنت");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "تعذر جلب المحتوى";
       toast.error(msg);
@@ -58,6 +80,13 @@ const BookDetail = () => {
       setLoading(false);
     }
   };
+
+  const removeOffline = () => {
+    removeCachedContent(book.id);
+    setHasCache(false);
+    toast.success("تم حذف النسخة المحفوظة");
+  };
+
 
   const sourceLabel = source === "gutenberg"
     ? "النص الكامل من Project Gutenberg"
@@ -114,11 +143,18 @@ const BookDetail = () => {
                 ))}
                 <span className="ml-2 text-sm text-muted-foreground">{book.rating} / 5</span>
               </div>
-              {book.verifiedSource && (
-                <div className="mt-3 inline-flex items-center gap-1 text-primary text-sm">
-                  <ShieldCheck className="h-4 w-4" /> {book.sourceName}
-                </div>
-              )}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {book.verifiedSource && (
+                  <span className="inline-flex items-center gap-1 text-primary text-sm">
+                    <ShieldCheck className="h-4 w-4" /> {book.sourceName}
+                  </span>
+                )}
+                {hasCache && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs">
+                    <WifiOff className="h-3 w-3" /> محفوظ للقراءة بدون إنترنت
+                  </span>
+                )}
+              </div>
               <p className={`mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed text-foreground/80 ${isRTL ? "font-arabic" : ""}`}>
                 {book.description}
               </p>
@@ -159,9 +195,20 @@ const BookDetail = () => {
                   <Heart className={`h-5 w-5 mr-2 ${fav ? "fill-primary text-primary" : ""}`} />
                   {fav ? "في المفضلة" : "أضف للمفضلة"}
                 </Button>
+                {hasCache && (
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={removeOffline}
+                    className="font-display text-sm sm:text-base h-11 sm:h-12 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-5 w-5 mr-2" />
+                    حذف النسخة المحفوظة
+                  </Button>
+                )}
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
-                يتم جلب النص من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي عالي الجودة. يُحفظ المحتوى ليكون فوريًا في المرات القادمة.
+                يُحفظ الكتاب على جهازك بعد أول قراءة ليعمل بدون إنترنت لاحقًا. النص يأتي من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي بالذكاء الاصطناعي.
               </p>
             </div>
           </div>
