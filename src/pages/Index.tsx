@@ -2,6 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, us
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { BookCard } from "@/components/BookCard";
+import { OfflineDownloader } from "@/components/OfflineDownloader";
 import { books, categories, languages, type Category, type Lang } from "@/data/books";
 import { quickSearchBooks } from "@/lib/search";
 import { cn } from "@/lib/utils";
