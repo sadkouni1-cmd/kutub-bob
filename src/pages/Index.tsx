@@ -88,8 +88,11 @@ const Index = () => {
       {!hasSearch && <Hero />}
 
       <main id="library" className={cn("container px-4 sm:px-6", hasSearch ? "py-6 sm:py-8" : "py-10 sm:py-16")}>
+        {!hasSearch && <OfflineDownloader className="mb-8 sm:mb-10" />}
+
         {/* Category strip */}
         <div className="mb-6 sm:mb-8">
+
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-primary mb-1 sm:mb-2">الأقسام</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">اختر القسم الذي يناسب مزاجك اليوم</p>
           <div className="flex flex-wrap gap-2 sm:gap-3">
