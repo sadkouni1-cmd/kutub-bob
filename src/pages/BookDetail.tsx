@@ -195,9 +195,20 @@ const BookDetail = () => {
                   <Heart className={`h-5 w-5 mr-2 ${fav ? "fill-primary text-primary" : ""}`} />
                   {fav ? "في المفضلة" : "أضف للمفضلة"}
                 </Button>
+                {hasCache && (
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={removeOffline}
+                    className="font-display text-sm sm:text-base h-11 sm:h-12 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-5 w-5 mr-2" />
+                    حذف النسخة المحفوظة
+                  </Button>
+                )}
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
-                يتم جلب النص من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي عالي الجودة. يُحفظ المحتوى ليكون فوريًا في المرات القادمة.
+                يُحفظ الكتاب على جهازك بعد أول قراءة ليعمل بدون إنترنت لاحقًا. النص يأتي من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي بالذكاء الاصطناعي.
               </p>
             </div>
           </div>
