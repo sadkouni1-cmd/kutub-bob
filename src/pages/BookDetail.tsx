@@ -17,6 +17,8 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(false);
   const [pages, setPages] = useState<string[] | null>(null);
   const [source, setSource] = useState<string | null>(null);
+  const cached = book ? getCachedContent(book.id) : null;
+  const [hasCache, setHasCache] = useState<boolean>(!!cached);
 
   if (!book) {
     return (
