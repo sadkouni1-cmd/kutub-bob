@@ -27,15 +27,13 @@ const Index = () => {
 
   const filtered = useMemo(() => {
     const base = deferredSearch.trim() ? quickSearchBooks(deferredSearch) : books;
-    if (deferredActiveCat === "all" && deferredActiveLang === "all" && deferredActiveSource === "all") return base;
+    if (deferredActiveCat === "all" && deferredActiveLang === "all") return base;
     return base.filter((b) => {
       if (deferredActiveCat !== "all" && b.category !== deferredActiveCat) return false;
       if (deferredActiveLang !== "all" && b.language !== deferredActiveLang) return false;
-      if (deferredActiveSource === "full" && !b.verifiedSource) return false;
-      if (deferredActiveSource === "summary" && b.verifiedSource) return false;
       return true;
     });
-  }, [deferredActiveCat, deferredActiveLang, deferredActiveSource, deferredSearch]);
+  }, [deferredActiveCat, deferredActiveLang, deferredSearch]);
 
   useEffect(() => {
     setVisibleCount(Math.min(INITIAL_VISIBLE_BOOKS, filtered.length));
