@@ -46,9 +46,9 @@ export const AboutDialog = ({ trigger }: { trigger?: React.ReactNode }) => {
             </DialogTitle>
           </div>
           <DialogDescription className="text-right leading-relaxed text-foreground/80 font-arabic text-base">
-            مكتبة رقمية أنيقة تجمع مئات الكتب بأربع لغات — العربية والفرنسية والإنجليزية والإسبانية.
+            مكتبة رقمية أنيقة تقدّم ملخّصات ذكية لمئات الكتب بأربع لغات — العربية والفرنسية والإنجليزية والإسبانية.
             تصفّح الفلسفة، الروايات، الكتب الدينية، قصص الأطفال، التنمية الذاتية والأكثر رواجًا،
-            واقرأ بسلاسة على هاتفك أو حاسوبك بدون إنترنت.
+            واقرأ ملخّصات واضحة على هاتفك أو حاسوبك بدون إنترنت.
           </DialogDescription>
         </DialogHeader>
 

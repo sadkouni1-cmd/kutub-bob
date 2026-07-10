@@ -37,7 +37,7 @@ const BookCardImpl = ({ book }: { book: Book }) => {
 
           <div className="book-spine absolute inset-0 pointer-events-none" />
           <div className="absolute top-2 right-2 rounded-full bg-card/90 px-2 py-0.5 text-[10px] text-card-foreground shadow-soft">
-            {book.verifiedSource ? "موثّق" : "قيد التحقق"}
+            {book.language === "ar" ? "عربي" : book.language === "fr" ? "Français" : book.language === "es" ? "Español" : "English"}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
           <div className="absolute bottom-2 left-2 right-2 text-primary-foreground opacity-0 group-hover:opacity-100 transition-smooth">
