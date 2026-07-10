@@ -11,7 +11,9 @@ const INITIAL_VISIBLE_BOOKS = 36;
 const BOOKS_PER_BATCH = 48;
 
 const Index = () => {
+  const [activeCat, setActiveCat] = useState<Category | "all">("all");
   const [activeLang, setActiveLang] = useState<Lang | "all">("all");
+  const [search, setSearch] = useState("");
   const [, startTransition] = useTransition();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_BOOKS);
   const loadMoreRef = useRef<HTMLDivElement>(null);
