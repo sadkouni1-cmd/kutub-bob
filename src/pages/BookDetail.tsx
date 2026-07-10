@@ -89,9 +89,9 @@ const BookDetail = () => {
 
 
   const sourceLabel = source === "gutenberg"
-    ? "النص الكامل من Project Gutenberg"
+    ? "ملخّص مبني على Project Gutenberg"
     : source === "wikisource"
-    ? "النص الكامل من ويكي مصدر"
+    ? "ملخّص مبني على ويكي مصدر"
     : "ملخّص تفصيلي بالذكاء الاصطناعي";
 
   return (
@@ -144,7 +144,7 @@ const BookDetail = () => {
                 <span className="ml-2 text-sm text-muted-foreground">{book.rating} / 5</span>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                {book.verifiedSource && (
+                {book.sourceName && (
                   <span className="inline-flex items-center gap-1 text-primary text-sm">
                     <ShieldCheck className="h-4 w-4" /> {book.sourceName}
                   </span>
@@ -171,10 +171,10 @@ const BookDetail = () => {
                       <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       جاري تحضير الكتاب...
                     </>
-                  ) : (
+                ) : (
                     <>
                       <BookOpen className="h-5 w-5 mr-2" />
-                      قراءة الكتاب
+                      قراءة الملخّص
                     </>
                   )}
                 </Button>
@@ -208,7 +208,7 @@ const BookDetail = () => {
                 )}
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
-                يُحفظ الكتاب على جهازك بعد أول قراءة ليعمل بدون إنترنت لاحقًا. النص يأتي من مصدر أصلي إن أمكن، وإلا يُولَّد ملخّص تفصيلي بالذكاء الاصطناعي.
+                يُعرض كل كتاب كملخّص تفصيلي. يُحفظ الملخّص على جهازك بعد أول قراءة ليعمل بدون إنترنت لاحقًا.
               </p>
             </div>
           </div>
