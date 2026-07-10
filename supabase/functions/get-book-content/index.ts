@@ -96,8 +96,25 @@ async function fetchWikisource(sourceUrl: string): Promise<string | null> {
 async function generateSummary(p: Payload): Promise<string> {
   const langMap = { ar: "Arabic", en: "English", fr: "French", es: "Spanish" } as const;
   const langName = langMap[p.language];
-  const system = `You are a literary expert. Produce a rich, faithful, well-structured reader-friendly rendition of the requested book strictly in ${langName}. Never invent facts about real books; when unsure, focus on themes and context. Output plain text with paragraphs separated by blank lines. No markdown, no headings with #, no lists. Length: ~3000-5000 words. Split into clear chapters using a chapter title line followed by a blank line then prose.`;
-  const user = `Book: "${p.title}" by ${p.author}\nLanguage: ${langName}\nCategory: ${p.category ?? "general"}\n${p.description ? `Description: ${p.description}\n` : ""}\nWrite a detailed, chapter-by-chapter comprehensive summary and analysis of this book (or, if it's a well-known text, a faithful condensed rendering of its key passages and ideas). Aim for a reader who wants to deeply understand the book without owning the original. Use the book's actual language: ${langName}.`;
+  const isChildren = p.category === "children";
+
+  const lessonsLabel = {
+    ar: "أهم الدروس المستفادة من الكتاب",
+    en: "Key Lessons from the Book",
+    fr: "Principales leçons du livre",
+    es: "Lecciones clave del libro",
+  }[p.language];
+
+  let system: string;
+  let user: string;
+
+  if (isChildren) {
+    system = `You are a beloved children's storyteller. Write the FULL children's story (not a summary) strictly in ${langName}, faithful to the original when it is a well-known tale. Warm, vivid, age-appropriate language. Plain text only, no markdown, no # headings, no bullet lists. Paragraphs separated by blank lines. Length: 1500-3000 words. If the story has natural scenes or chapters, separate them with a short title line followed by a blank line.`;
+    user = `Children's story: "${p.title}" by ${p.author}\nLanguage: ${langName}\n${p.description ? `Description: ${p.description}\n` : ""}\nRewrite/tell the COMPLETE story from beginning to end in the child's own voice and rhythm — do NOT summarize, do NOT add a "lessons" section. Keep it in ${langName}.`;
+  } else {
+    system = `You are a literary expert producing a COMPREHENSIVE, EXPANDED multi-page summary of the requested book, strictly in ${langName}. Never invent facts about real books; when unsure, discuss themes, context, and the author's known ideas. Output plain text, paragraphs separated by blank lines. No markdown, no # headings, no bullet lists inside chapters. Split the work into 6–10 clearly titled chapters/sections (title on its own line, blank line, then prose). Target length: 5000–8000 words — be thorough, quote key ideas, give examples, and unpack arguments deeply. End with a final section titled exactly "${lessonsLabel}" containing 7–12 numbered lessons (each lesson: one short bold-worthy sentence, then 2–3 sentences explaining it). This final section is REQUIRED.`;
+    user = `Book: "${p.title}" by ${p.author}\nLanguage: ${langName}\nCategory: ${p.category ?? "general"}\n${p.description ? `Description: ${p.description}\n` : ""}\nProduce a rich, expanded, chapter-by-chapter comprehensive summary and analysis so a reader deeply understands the book without owning the original. Be extensive across multiple pages. Finish with the required "${lessonsLabel}" section listing the concrete, actionable lessons the reader should take away. Write everything in ${langName}.`;
+  }
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
