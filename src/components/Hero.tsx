@@ -14,9 +14,9 @@ export const Hero = () => (
         Read With Bob
       </h1>
       <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg md:text-xl text-primary-foreground/85 animate-fade-up px-2" style={{ animationDelay: "0.2s" }}>
-        مئات الكتب: روايات، فلسفة، كتب دينية وقصص للأطفال — بأربع لغات. اقرأها بدون إنترنت.
+        مئات الملخّصات الذكية: روايات، فلسفة، كتب دينية وقصص للأطفال — بأربع لغات. اقرأها بدون إنترنت.
         <br />
-        <span className="text-accent font-display italic text-base sm:text-xl">A library that reads like silk.</span>
+        <span className="text-accent font-display italic text-base sm:text-xl">Smart summaries at your fingertips.</span>
       </p>
       <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
         <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-book font-display text-sm sm:text-base w-full sm:w-auto">
