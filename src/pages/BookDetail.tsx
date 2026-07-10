@@ -169,9 +169,9 @@ const BookDetail = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      جاري تحضير الكتاب...
+                      جاري تحضير الملخّص...
                     </>
-                ) : (
+                  ) : (
                     <>
                       <BookOpen className="h-5 w-5 mr-2" />
                       قراءة الملخّص
