@@ -19,7 +19,6 @@ const Index = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const deferredActiveCat = useDeferredValue(activeCat);
   const deferredActiveLang = useDeferredValue(activeLang);
-  const deferredActiveSource = useDeferredValue(activeSource);
   const deferredSearch = useDeferredValue(search);
 
   const handleSearch = useCallback((value: string) => {
