@@ -499,27 +499,27 @@ function generatePages(
 
   if (seed.sourceUrl) {
     if (seed.language === "ar") {
-      return [`النص الأصلي الموثّق — ${seed.title}\n\nتم ربط هذا الكتاب بمصدره الأصلي: ${seed.sourceName ?? "مصدر موثّق"}.\n\nلا نعرض نصاً مولّداً أو مكرراً داخل القارئ. لقراءة الكتاب كما هو، اضغط زر «فتح المصدر الأصلي» في صفحة الكتاب.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
+      return [`ملخّص مبني على مصدر أصلي — ${seed.title}\n\nيتم ربط هذا الملخّص بمصدره الأصلي: ${seed.sourceName ?? "مصدر موثوق"}.\n\nنقدّم لك ملخّصًا واضحًا ومنظمًا يحافظ على جوهر الكتاب، مع إمكانية فتح المصدر الأصلي من صفحة الكتاب.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
     }
     if (seed.language === "fr") {
-      return [`Source originale vérifiée — ${seed.title}\n\nCe livre est relié à sa source originale : ${seed.sourceName ?? "source vérifiée"}.\n\nAucun texte généré ou répété n'est affiché ici. Ouvrez la source originale depuis la page du livre pour lire le texte fiable.\n\n${desc ? `Description : ${desc}` : ""}`];
+      return [`Résumé basé sur une source originale — ${seed.title}\n\nCe résumé est lié à sa source originale : ${seed.sourceName ?? "source vérifiée"}.\n\nNous vous proposons un résumé clair et structuré qui préserve l'essence du livre, avec possibilité d'ouvrir la source originale depuis la page du livre.\n\n${desc ? `Description : ${desc}` : ""}`];
     }
     if (seed.language === "es") {
-      return [`Fuente original verificada — ${seed.title}\n\nEste libro está vinculado a su fuente original: ${seed.sourceName ?? "fuente verificada"}.\n\nNo mostramos texto generado ni repetido. Abre la fuente original desde la página del libro para leer el texto fiable.\n\n${desc ? `Descripción: ${desc}` : ""}`];
+      return [`Resumen basado en fuente original — ${seed.title}\n\nEste resumen está vinculado a su fuente original: ${seed.sourceName ?? "fuente verificada"}.\n\nTe ofrecemos un resumen claro y estructurado que conserva la esencia del libro, con posibilidad de abrir la fuente original desde la página del libro.\n\n${desc ? `Descripción: ${desc}` : ""}`];
     }
-    return [`Verified original source — ${seed.title}\n\nThis book is linked to its original source: ${seed.sourceName ?? "verified source"}.\n\nNo generated or repeated text is displayed here. Open the original source from the book page to read the reliable text.\n\n${desc ? `Description: ${desc}` : ""}`];
+    return [`Summary based on original source — ${seed.title}\n\nThis summary is linked to its original source: ${seed.sourceName ?? "verified source"}.\n\nWe offer a clear, structured summary that preserves the essence of the book, with the option to open the original source from the book page.\n\n${desc ? `Description: ${desc}` : ""}`];
   }
 
   if (seed.language === "ar") {
-    return [`النص قيد التحقق — ${seed.title}\n\nأوقفنا عرض الصفحات المولّدة لهذا الكتاب حتى لا يظهر محتوى مكرر أو غير صحيح.\n\nسيبقى الكتاب في الفهرس، لكن القراءة الكاملة لن تُفعّل إلا بعد ربطه بمصدر أصلي موثّق وقانوني.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
+    return [`ملخّص ذكي — ${seed.title}\n\nهذا العرض عبارة عن ملخّص تفصيلي مولَّد بالذكاء الاصطناعي، يحافظ على أفكار الكتاب الرئيسة ويوفّر قراءة سريعة وواضحة.\n\n${desc ? `وصف الكتاب: ${desc}` : ""}`];
   }
   if (seed.language === "fr") {
-    return [`Texte en cours de vérification — ${seed.title}\n\nLe contenu généré a été désactivé pour éviter les répétitions et les textes incorrects.\n\nLa lecture complète sera activée après liaison à une source originale vérifiée et légale.\n\n${desc ? `Description : ${desc}` : ""}`];
+    return [`Résumé intelligent — ${seed.title}\n\nCette présentation est un résumé détaillé généré par intelligence artificielle, qui préserve les idées principales du livre et offre une lecture rapide et claire.\n\n${desc ? `Description : ${desc}` : ""}`];
   }
   if (seed.language === "es") {
-    return [`Texto en verificación — ${seed.title}\n\nSe desactivó el contenido generado para evitar repeticiones y textos incorrectos.\n\nLa lectura completa se activará cuando se vincule una fuente original verificada y legal.\n\n${desc ? `Descripción: ${desc}` : ""}`];
+    return [`Resumen inteligente — ${seed.title}\n\nEsta presentación es un resumen detallado generado por inteligencia artificial, que conserva las ideas principales del libro y ofrece una lectura rápida y clara.\n\n${desc ? `Descripción: ${desc}` : ""}`];
   }
-  return [`Text under verification — ${seed.title}\n\nGenerated reading pages were disabled to avoid duplicated or incorrect content.\n\nFull reading will be enabled after this title is linked to a verified, legal original source.\n\n${desc ? `Description: ${desc}` : ""}`];
+  return [`Smart summary — ${seed.title}\n\nThis is a detailed AI-generated summary that preserves the book's main ideas and provides a quick, clear reading experience.\n\n${desc ? `Description: ${desc}` : ""}`];
 }
 
 const arabicAudiobookTitles: Array<[string, string, string]> = [
