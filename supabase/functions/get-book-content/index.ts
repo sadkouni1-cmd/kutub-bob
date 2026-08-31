@@ -10,7 +10,9 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
+
 
 interface Payload {
   bookId: string;
@@ -116,6 +118,44 @@ async function generateSummary(p: Payload): Promise<string> {
     user = `Book: "${p.title}" by ${p.author}\nLanguage: ${langName}\nCategory: ${p.category ?? "general"}\n${p.description ? `Description: ${p.description}\n` : ""}\nProduce a rich, expanded, chapter-by-chapter comprehensive summary and analysis so a reader deeply understands the book without owning the original. Be extensive across multiple pages. Finish with the required "${lessonsLabel}" section listing the concrete, actionable lessons the reader should take away. Write everything in ${langName}.`;
   }
 
+  // Prefer Google AI Studio (Gemini API) directly — free tier / cheaper tokens.
+  if (GEMINI_API_KEY) {
+    const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY,
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: user }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 8192 },
+        }),
+      },
+    );
+    if (r.ok) {
+      const j = await r.json();
+      const parts = j?.candidates?.[0]?.content?.parts ?? [];
+      const text: string = parts.map((p: { text?: string }) => p?.text ?? "").join("").trim();
+      if (text) return text;
+    } else {
+      const t = await r.text();
+      console.error(`Gemini API ${r.status}: ${t.slice(0, 300)}`);
+      // 429 = free-tier rate limit, 4xx = key/model problem → surface it
+      if (r.status === 429 || r.status === 401 || r.status === 403) {
+        const err = new Error(`Gemini ${r.status}: ${t.slice(0, 200)}`) as Error & { status?: number };
+        err.status = r.status;
+        throw err;
+      }
+      // otherwise fall through to the Lovable gateway below
+    }
+  }
+
+  if (!LOVABLE_API_KEY) throw new Error("No AI provider configured");
+
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -141,6 +181,7 @@ async function generateSummary(p: Payload): Promise<string> {
   if (!text.trim()) throw new Error("Empty AI response");
   return text.trim();
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
