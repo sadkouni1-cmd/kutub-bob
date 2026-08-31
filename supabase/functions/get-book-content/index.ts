@@ -132,7 +132,9 @@ async function generateSummary(p: Payload): Promise<string> {
   });
   if (!r.ok) {
     const t = await r.text();
-    throw new Error(`AI ${r.status}: ${t.slice(0, 200)}`);
+    const err = new Error(`AI ${r.status}: ${t.slice(0, 200)}`) as Error & { status?: number };
+    err.status = r.status;
+    throw err;
   }
   const j = await r.json();
   const text: string = j?.choices?.[0]?.message?.content ?? "";
@@ -196,8 +198,23 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const err = e as Error & { status?: number };
+    const status = err.status;
+    let message = err.message ?? "تعذر تحضير الملخّص";
+    let code = "unknown";
+    if (status === 402) {
+      code = "no_credits";
+      message = "انتهى رصيد الذكاء الاصطناعي للتطبيق. يلزم إضافة رصيد لتوليد ملخّصات جديدة. الكتب المحفوظة مسبقًا تعمل بدون إنترنت.";
+    } else if (status === 429) {
+      code = "rate_limited";
+      message = "الطلبات كثيرة الآن. يُرجى المحاولة بعد قليل.";
+    } else if (status === 403) {
+      code = "blocked";
+      message = "خدمة الذكاء الاصطناعي غير متاحة حاليًا لهذا التطبيق.";
+    }
+    // Always answer 200 so the client can show a clean message instead of crashing.
+    return new Response(JSON.stringify({ error: message, code, upstreamStatus: status ?? null }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

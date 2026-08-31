@@ -63,8 +63,9 @@ const BookDetail = () => {
           sourceUrl: book.sourceUrl,
         },
       });
-      if (error) throw error;
-      if (!data?.pages?.length) throw new Error("لا يوجد محتوى");
+      if (error) throw new Error("تعذر الاتصال بالخدمة. تحقق من الإنترنت وحاول مرة أخرى.");
+      if (data?.error) throw new Error(data.error as string);
+      if (!data?.pages?.length) throw new Error("لا يوجد محتوى متاح لهذا الكتاب حاليًا");
       const nextPages = data.pages as string[];
       const nextSource = data.source as string;
       setPages(nextPages);
