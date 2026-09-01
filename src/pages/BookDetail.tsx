@@ -41,6 +41,7 @@ const BookDetail = () => {
       setPages(local.pages);
       setSource(local.source);
       setReading(true);
+      setLastRead(book.id);
       return;
     }
 
