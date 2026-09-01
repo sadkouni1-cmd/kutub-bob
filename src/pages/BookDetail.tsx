@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BookReader } from "@/components/BookReader";
 import { getBook, languages } from "@/data/books";
-import { useIsFavorite, toggleFavorite, getCachedContent, saveCachedContent, removeCachedContent } from "@/lib/library-storage";
+import { useIsFavorite, toggleFavorite, getCachedContent, saveCachedContent, removeCachedContent, setLastRead } from "@/lib/library-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
