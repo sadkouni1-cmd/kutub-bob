@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { BookCard } from "@/components/BookCard";
 import { OfflineDownloader } from "@/components/OfflineDownloader";
+import { ContinueReading } from "@/components/ContinueReading";
 import { books, categories, languages, type Category, type Lang } from "@/data/books";
 import { quickSearchBooks } from "@/lib/search";
 import { cn } from "@/lib/utils";
