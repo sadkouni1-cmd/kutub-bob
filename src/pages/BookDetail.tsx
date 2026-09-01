@@ -74,6 +74,7 @@ const BookDetail = () => {
       saveCachedContent(book.id, nextPages, nextSource);
       setHasCache(true);
       setReading(true);
+      setLastRead(book.id);
       toast.success("تم حفظ الكتاب على جهازك للقراءة بدون إنترنت");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "تعذر جلب المحتوى";
