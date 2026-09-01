@@ -120,7 +120,7 @@ async function generateSummary(p: Payload): Promise<string> {
 
   // Prefer Google AI Studio (Gemini API) directly — free tier / cheaper tokens.
   if (GEMINI_API_KEY) {
-    const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+    const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.6-flash";
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
