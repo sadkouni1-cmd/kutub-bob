@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { BookCard } from "@/components/BookCard";
 import { OfflineDownloader } from "@/components/OfflineDownloader";
+import { ContinueReading } from "@/components/ContinueReading";
 import { books, categories, languages, type Category, type Lang } from "@/data/books";
 import { quickSearchBooks } from "@/lib/search";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,7 @@ const Index = () => {
       {!hasSearch && <Hero />}
 
       <main id="library" className={cn("container px-4 sm:px-6", hasSearch ? "py-6 sm:py-8" : "py-10 sm:py-16")}>
+        {!hasSearch && <ContinueReading className="mb-8 sm:mb-10" />}
         {!hasSearch && <OfflineDownloader className="mb-8 sm:mb-10" />}
 
         {/* Category strip */}

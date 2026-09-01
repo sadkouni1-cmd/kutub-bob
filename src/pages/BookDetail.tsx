@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BookReader } from "@/components/BookReader";
 import { getBook, languages } from "@/data/books";
-import { useIsFavorite, toggleFavorite, getCachedContent, saveCachedContent, removeCachedContent } from "@/lib/library-storage";
+import { useIsFavorite, toggleFavorite, getCachedContent, saveCachedContent, removeCachedContent, setLastRead } from "@/lib/library-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -41,6 +41,7 @@ const BookDetail = () => {
       setPages(local.pages);
       setSource(local.source);
       setReading(true);
+      setLastRead(book.id);
       return;
     }
 
@@ -73,6 +74,7 @@ const BookDetail = () => {
       saveCachedContent(book.id, nextPages, nextSource);
       setHasCache(true);
       setReading(true);
+      setLastRead(book.id);
       toast.success("تم حفظ الكتاب على جهازك للقراءة بدون إنترنت");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "تعذر جلب المحتوى";

@@ -155,6 +155,7 @@ export const saveProgress = (id: string, spread: number, totalSpreads: number) =
   const map = readJSON<ProgressMap>(PROGRESS_KEY, {});
   map[id] = { spread, totalSpreads, updatedAt: Date.now() };
   writeJSON(PROGRESS_KEY, map);
+  setLastRead(id);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("rwb:progress"));
 };
 
@@ -162,5 +163,38 @@ export const clearProgress = (id: string) => {
   const map = readJSON<ProgressMap>(PROGRESS_KEY, {});
   delete map[id];
   writeJSON(PROGRESS_KEY, map);
+  if (getLastRead()?.id === id) writeJSON(LAST_READ_KEY, null);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("rwb:progress"));
+};
+
+/* ---------- Last read book (resume after closing the app) ---------- */
+
+const LAST_READ_KEY = "rwb:lastRead";
+
+export interface LastRead {
+  id: string;
+  updatedAt: number;
+}
+
+export const getLastRead = (): LastRead | null => readJSON<LastRead | null>(LAST_READ_KEY, null);
+
+export const setLastRead = (id: string) => {
+  writeJSON(LAST_READ_KEY, { id, updatedAt: Date.now() } satisfies LastRead);
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("rwb:progress"));
+};
+
+export const useLastRead = (): LastRead | null => {
+  const [last, setLast] = useState<LastRead | null>(() => getLastRead());
+
+  useEffect(() => {
+    const sync = () => setLast(getLastRead());
+    window.addEventListener("rwb:progress", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("rwb:progress", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  return last;
 };
