@@ -121,38 +121,51 @@ async function generateSummary(p: Payload): Promise<string> {
   // Prefer Google AI Studio (Gemini API) directly — free tier / cheaper tokens.
   if (GEMINI_API_KEY) {
     const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.6-flash";
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": GEMINI_API_KEY,
+    const delays = [0, 4000, 12000, 25000]; // retry rate limits with backoff
+    let lastStatus = 0;
+    let lastBody = "";
+
+    for (const wait of delays) {
+      if (wait) await new Promise((res) => setTimeout(res, wait));
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY,
+          },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: [{ role: "user", parts: [{ text: user }] }],
+            generationConfig: { temperature: 0.8, maxOutputTokens: 8192 },
+          }),
         },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: user }] }],
-          generationConfig: { temperature: 0.8, maxOutputTokens: 8192 },
-        }),
-      },
-    );
-    if (r.ok) {
-      const j = await r.json();
-      const parts = j?.candidates?.[0]?.content?.parts ?? [];
-      const text: string = parts.map((p: { text?: string }) => p?.text ?? "").join("").trim();
-      if (text) return text;
-    } else {
-      const t = await r.text();
-      console.error(`Gemini API ${r.status}: ${t.slice(0, 300)}`);
-      // 429 = free-tier rate limit, 4xx = key/model problem → surface it
-      if (r.status === 429 || r.status === 401 || r.status === 403) {
-        const err = new Error(`Gemini ${r.status}: ${t.slice(0, 200)}`) as Error & { status?: number };
-        err.status = r.status;
-        throw err;
+      );
+      if (r.ok) {
+        const j = await r.json();
+        const parts = j?.candidates?.[0]?.content?.parts ?? [];
+        const text: string = parts.map((p: { text?: string }) => p?.text ?? "").join("").trim();
+        if (text) return text;
+        lastStatus = 200;
+        lastBody = "empty response";
+        continue; // empty candidate → retry
       }
-      // otherwise fall through to the Lovable gateway below
+      lastStatus = r.status;
+      lastBody = await r.text();
+      console.error(`Gemini API ${r.status}: ${lastBody.slice(0, 300)}`);
+      // Retry only transient failures (rate limit / server side)
+      if (r.status !== 429 && r.status < 500) break;
     }
+
+    if (lastStatus === 401 || lastStatus === 403) {
+      const err = new Error(`Gemini ${lastStatus}: ${lastBody.slice(0, 200)}`) as Error & { status?: number };
+      err.status = lastStatus;
+      throw err;
+    }
+    // otherwise fall through to the Lovable gateway below
   }
+
 
   if (!LOVABLE_API_KEY) throw new Error("No AI provider configured");
 
